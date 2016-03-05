@@ -131,7 +131,7 @@
 
                     if(!opt.attr('value'))opt.attr('value',opt.val());
 
-                    li = $('<li data-val="' + opt.val() + '"><label>' + opt.text() + '</label></li>');
+                    li = $('<li><label>' + opt.text() + '</label></li>').data('val',opt.val());
                     if (O.is_multi) li.prepend('<span><i></i></span>');
 
                     if (opt[0].disabled)
@@ -171,8 +171,8 @@
                                 changed = true;
                             }
                             else {
-                                O.E.children('option:selected').each(function () {
-                                    if (O.Pstate.indexOf($(this).val()) < 0) changed = true;
+                                O.E.children('option').each(function (i,e) {
+                                    if(e.selected && O.Pstate.indexOf(i) < 0) changed = true;
                                 });
                             }
 
@@ -198,9 +198,9 @@
                         O.optDiv.find('li.selected').removeClass('selected')
 
                         //restore selections from saved state.
-                        for (i = 0; i < O.Pstate.length; i++) {
-                            O.E.children('option[value="' + O.Pstate[i] + '"]')[0].selected = true;
-                            O.optDiv.find('li[data-val="' + O.Pstate[i] + '"]').addClass('selected');
+                        for(var i = 0; i < O.Pstate.length; i++) {
+                            O.E.children('option')[O.Pstate[i]].selected = true;
+                            O.ul.children('li').eq(O.Pstate[i]).addClass('selected');
                         }
                     O.selAllState();
                 },
@@ -376,10 +376,10 @@
                         O.optDiv.css('height', H);
                     }
 
-                    //maintain state when ok/cancel buttons are available.
+                    //maintain state when ok/cancel buttons are available storing the indexes.
                     if (O.is_multi && (O.is_floating || settings.okCancelInMulti)) {
                         O.Pstate = [];
-                        O.E.children('option:selected').each(function () { O.Pstate.push($(this).val()); });
+                        O.E.children('option').each(function (i, e){if(e.selected) O.Pstate.push(i);});
                     }
                 },
                 hideOpts: function () {
@@ -483,7 +483,7 @@
                         txt = "";
                         if (O.is_multi) {
                             li.toggleClass('selected');
-                            O.E.children('option[value="' + li.data('val') + '"]')[0].selected = li.hasClass('selected');
+                            O.E.children("option[value='" + li.data('val') + "']")[0].selected = li.hasClass('selected');
 
                             O.selAllState();
                         }
