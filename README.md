@@ -1,3 +1,7 @@
+# Changes from original:
+* Support of other external data sources using a dataSource option (similar in nature to the [source](http://api.jqueryui.com/autocomplete/#option-source) option in jquery ui's autocomplete widget).
+* Options use absolute positioning within the DOM to minimize DOM conflicts and scrolling.
+
 jquery.sumoselect
 =============
 
