@@ -95,7 +95,7 @@
                     O.E.addClass('SumoUnder').attr('tabindex','-1');
 
                     //## Creating the list...
-                    O.optDiv = $('<div class="optWrapper '+ (settings.up?'up':'') +'">');
+                    O.optDiv = $('<div class="sumo-select-options-wrapper '+ (settings.up?'up':'') +'">');
 
                     //branch for floating list in low res devices.
                     O.floatingList();
@@ -119,7 +119,7 @@
                     //if multiple then add the class multiple and add OK / CANCEL button
                     if (O.is_multi) O.multiSelelect();
 
-                    O.select.append(O.optDiv);
+                    $('body').append(O.optDiv);
                     O.basicEvents();
                     O.selAllState();
                 },
@@ -239,7 +239,10 @@
                     cc.append(O.ftxt);
                     O.optDiv.children('ul').after(P);
 
-                    O.ftxt.on('keyup.sumo',function(){
+                    O.ftxt.on('keyup.sumo',function(e){
+                        if(e.which === 38 || e.which === 40 || e.which === 13 || e.which === 27){
+                            return;
+                        }
                         if(settings.dataSource){
                             if(typeof settings.dataSource === 'string'){
                                 O.populateOptionsViaAjax(settings.dataSource, O.ftxt.val());
@@ -336,10 +339,20 @@
                     if (O.E.attr('disabled')) return; // if select is disabled then retrun
 
                     // if there are no options, ex. ajax src, dont show the option div
-                    if (O.optDiv.find('ul.options li').length <=0){
-                        O.optDiv.addClass('hidden');
+                    if (O.optDiv.find('ul.options li').length > 0){
+                        O.optDiv.addClass('open');
+                        if(!O.is_floating){
+                            var selectPosition = O.select.offset();
+                            var selectHeight = O.select.height();
+                            var selectWidth = O.select.width();
+                            O.optDiv.css({
+                                'top': selectPosition.top + selectHeight + 5 + 'px',
+                                'left': selectPosition.left + 'px',
+                                'min-width': selectWidth
+                            });
+                        }
                     }else{
-                        O.optDiv.removeClass('hidden');
+                        O.optDiv.removeClass('open');
                     }
 
                     O.is_opened = true;
@@ -349,8 +362,8 @@
 
                     // hide options on click outside.
                     $(document).on('click.sumo', function (e) {
-                        if (!O.select.is(e.target)                  // if the target of the click isn't the container...
-                            && O.select.has(e.target).length === 0){ // ... nor a descendant of the container
+                        if (!O.E.is(e.target)                  // if the target of the click isn't the container...
+                            && O.optDiv.has(e.target).length === 0){ // ... nor a descendant of the container
                             if(!O.is_opened)return;
                             O.hideOpts();
                             if (O.is_multi && settings.okCancelInMulti)O._cnbtn();
@@ -373,7 +386,8 @@
                     var O = this;
                     if(O.is_opened){
                         O.is_opened = false;
-                        O.select.removeClass('open').find('ul li.sel').removeClass('sel');
+                        O.select.removeClass('open');
+                        O.optDiv.removeClass('open').find('ul li.sel').removeClass('sel');
                         $(document).off('click.sumo');
                         O.select.focus();
 
@@ -444,7 +458,7 @@
                                     else
                                         O.setOnOpen();
                                     break;
-				case 9:	 //tab
+				                case 9:	 //tab
                                 case 27: // esc
                                      if (O.is_multi && settings.okCancelInMulti)O._cnbtn();
                                     O.hideOpts();
@@ -632,7 +646,7 @@
 							O.optDiv.find('ul.options li').eq($(this).index()).toggleClass('selected', c);
                         O.setText();
                     });
-                    if(!O.mob && (settings.selectAll || settings.search))O.selAll.removeClass('partial').toggleClass('selected',c);
+                    if(!O.mob && settings.selectAll) O.selAll.removeClass('partial').toggleClass('selected',c);
                 },
 
                 /* outside accessibility options
@@ -677,10 +691,7 @@
                         opts.eq(i).before(opt);
                         if(!O.mob)O.ul.children('li').eq(i).before(O.createLi(opt));
                     }
-
-                    if(O.optDiv.hasClass('hidden')){
-                        O.optDiv.removeClass('hidden');
-                    }
+                    O.showOpts();
 
                     return selObj;
                 },
@@ -738,3 +749,4 @@
 
 
 }(jQuery));
+
